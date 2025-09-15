@@ -181,11 +181,9 @@ class HttpService {
         this.refreshQueue = [];
     }
 
-    // 公共请求方法
-    public get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    public get<T>(url: string, config?: AxiosRequestConfig):  Promise<AxiosResponse<T>>{
         return this.instance.get<T>(url, config);
     }
-
     public post<T>(url: string, data?: never, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         return this.instance.post<T>(url, data, config);
     }

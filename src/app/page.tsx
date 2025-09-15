@@ -1,8 +1,22 @@
 'use client';
 import {Card, CardHeader, Divider, Link, CardBody, CardFooter, Button} from "@heroui/react";
 import {ArrowRightLeft, Gem, Wallet, HardDrive} from 'lucide-react';
+import React, {useEffect, useState} from "react";
+import {getIndexData} from "@/api";
 
 export default function Home() {
+
+    const [indexData, setIndexData] = useState({});
+
+    useEffect(() => {
+        getIndexData().then((res) => {
+            setIndexData(res.data.data);
+        }).catch((error) => {
+            console.error("Error fetching index data:", error);
+        });
+    }, []);
+    console.log(indexData)
+
     return (
         <div className="min-h-screen flex p-10 flex-col   bg-gray-100">
             <Card className="">
