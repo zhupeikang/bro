@@ -1,5 +1,5 @@
 'use client';
-import React, {use, useEffect} from 'react'
+import React, {use, useEffect, useState} from 'react'
 import {
     Card,
     CardBody, CardFooter,
@@ -15,46 +15,48 @@ import {
 import {useIndexData} from "@/hooks/useIndexData";
 import {useRouter, useSearchParams} from "next/navigation";
 import {Chip} from "@heroui/chip";
-import {blockDetail, blockList, blockType} from "@/api";
+import {blockDetail, blockList, blockType, transactionDetail, transactionDetailHash} from "@/api";
 import {toDate} from "@/lib/function";
 
 export default function Page({params,searchParams}: {
-    params: Promise<{ block: string }>,
+    params: Promise<{ transaction: string }>,
     searchParams: Promise<{data:string }>
 }) {
 
     const {data:search}=use(searchParams)
-    const obj:{ BlockHash:string,BlockHeight:number,Timestamp:string,TxNum:number} = JSON.parse(atob(search));
+    const obj:{ TxId:string} = JSON.parse(atob(search));
 
     const [isLoading, setIsLoading] = React.useState(true);
 
-
-    const {block} = use(params)
+    const [info,setInfo]=useState({})
+    const {transaction} = use(params)
 
     const [data, setData] = React.useState<blockType[]>();
     const [page, setPage] = React.useState(1);
-    const [total, setTotal] = React.useState(0);
-
-    const rowsPerPage = 10;
+    const rowsPerPage = 40;
     const loadingState = isLoading || data?.length === 0 ? "loading" : "idle";
-    const totalPage = React.useMemo(() => {
-        return Math.ceil(total / rowsPerPage);
-    }, [total]);
+
     // 发送请求
     useEffect(() => {
-        blockDetail({size: rowsPerPage, block_height: block as unknown as number,page:page-1}).then((res) => {
+        transactionDetail({id:transaction}).then((res) => {
             // 取出第一条数据的ID值除以size当做总页数
-            res.data.data.list.forEach(item => {
+            res.data.data.forEach(item => {
                 item.Timestamp = toDate(Number(item.Timestamp))
             })
             setIsLoading(false)
-            setData(res.data.data.list);
-            setTotal(res.data.data.total);
-
+            setData(res.data.data);
             // 处理返回的数据
         }).catch((error) => {
         });
-    }, [block, page]);
+        // transactionDetailHash({hash:obj.TxId}).then((res) => {
+        transactionDetailHash({hash:'f86e1375d633d2fe59bd2b734c7b3bd93c3a39582f246c49c2e73e9d99ee160e'}).then((res) => {
+            console.log(res)
+
+            setInfo(res.data.data.result)
+            // 处理返回的数据
+        }).catch((error) => {
+        });
+    }, [transaction, page]);
     const router = useRouter()
 
     const renderCell = React.useCallback((user: blockType, columnKey: keyof blockType) => {
@@ -110,18 +112,18 @@ export default function Page({params,searchParams}: {
 
     return (
         <div className="p-10">
-            <p className={'text-2xl font-bold'}>区块详情</p>
+            <p className={'text-2xl font-bold'}>交易详情</p>
             <div className="mt-4">
                 <Card>
                     <CardHeader>
-                        <h3 className="font-bold">当前区块:<Chip className={'text-lg'} color="success">{block}</Chip></h3>
+                        <h3 className="font-bold">基本信息</h3>
                     </CardHeader>
                     <Divider/>
                     <CardBody>
                         <div className="flex flex-col gap-3">
                             <div className="flex ">
-                                <div className={'font-bold'}>区块哈希</div>
-                                <div className={'ml-4'}>{obj.BlockHash}</div>
+                                <div className={'font-bold'}>交易哈希</div>
+                                <div className={'ml-4'}>{info.tx_id}</div>
                             </div>
                             <div className="flex ">
                                 <div className={'font-bold'}>交易数量</div>
@@ -142,42 +144,10 @@ export default function Page({params,searchParams}: {
                     </CardHeader>
                     <Divider/>
                     <CardBody>
-                        <Table
-                            isStriped
-                        >
-                            <TableHeader>
-                                <TableColumn key="TxId">
-                                    交易哈希</TableColumn>
-                                <TableColumn key="TxType">交易消息类型</TableColumn>
-                                <TableColumn key="TxStatusCode">状态</TableColumn>
-                                <TableColumn key="BlockHeight">区块高度</TableColumn>
-                                <TableColumn key="Timestamp">时间</TableColumn>
-                                <TableColumn key="Gas">GAS</TableColumn>
-                            </TableHeader>
-                            <TableBody
-                                items={data ?? []}
-                                loadingContent={<Spinner/>}
-                                loadingState={loadingState}
-                                isLoading={isLoading}
-                            >
-                                {(item) => (
-                                    <TableRow key={item?.Id}>
-                                        {(columnKey) => <TableCell>{renderCell(item, columnKey as keyof blockType)}</TableCell>}
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+
                     </CardBody>
                     <CardFooter className={'flex justify-end'}>
-                        <Pagination
-                            isCompact
-                            showControls
-                            showShadow
-                            color="primary"
-                            page={page}
-                            total={totalPage}
-                            onChange={(page) => setPage(page)}
-                        />
+
                     </CardFooter>
                 </Card>
             </div>

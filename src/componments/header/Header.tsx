@@ -40,6 +40,7 @@ export default function Header() {
             <NavbarContent className="hidden sm:flex gap-4" justify="end">
                 {nav.map((item:NavItem) => {
                     const isActive = pathname === item.href;
+                    console.log(pathname,item.href)
                     return (
                         <NavbarItem key={item.name} data-active={item.href === pathname} className="text-sm">
                             <Link aria-current={isActive ? 'page' : undefined}

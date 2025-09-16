@@ -1,89 +1,116 @@
 'use client';
-import {Card, CardBody, CardFooter, CardHeader} from "@heroui/react";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
+    Card,
+    CardBody,
+    CardFooter,
+    CardHeader,
+    Link,
     Pagination,
     Spinner,
-    getKeyValue,
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow
 } from "@heroui/react";
-import React, {useEffect, useRef} from "react";
+import React, {useEffect} from "react";
 import {blockList, blockType} from "@/api";
+import {useIndexData} from "@/hooks/useIndexData";
+import {Chip} from "@heroui/chip";
+import {useRouter} from "next/navigation";
+import {toDate} from "@/lib/function";
+
 export default function Page() {
 
-    const [data,setData] = React.useState<blockType[]>();
+    const [data, setData] = React.useState<blockType[]>();
     const [page, setPage] = React.useState(1);
-    const rowsPerPage = 40;
-    const [firstItemId, setFirstItemId] = React.useState<number >(0);
-    const total = React.useMemo(() => {
-        if (!firstItemId) return 0;
-        return Math.ceil(firstItemId / rowsPerPage);
-    }, [firstItemId, rowsPerPage]);
-    console.log("总页数:", total);
+    const rowsPerPage = 50;
+    const [total, setTotal] = React.useState(0);
+    const totalPage = React.useMemo(() => {
+        return Math.ceil(total / rowsPerPage);
 
-    const toDate = (timestamp: number) => {
-        const date = new Date(timestamp * 1000); // 将秒转换为毫秒
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
+    }, [total]);
 
 
     // 发送请求
     useEffect(() => {
-        blockList({size:rowsPerPage,page:page}).then((res) => {
+        blockList({size: rowsPerPage,page:page-1}).then((res) => {
             // 取出第一条数据的ID值除以size当做总页数
             setIsLoading(false);
-            if (!firstItemId) {
-                setFirstItemId(res.data.data[0]?.Id || 0); // 只在第一次赋值
-            }
-            res.data.data.forEach(item=>{
+            res.data.data.list.forEach(item => {
                 item.Timestamp = toDate(Number(item.Timestamp))
             })
-            setData(res.data.data);
+            setData(res.data.data.list);
+            setTotal(res.data.data.total);
             // 处理返回的数据
-        }).catch((error) => {});
-    }, [firstItemId, page]);
+        }).catch((error) => {
+        });
+    }, [page]);
     const [isLoading, setIsLoading] = React.useState(true);
 
-
+    const router = useRouter()
 
     const loadingState = isLoading || data?.length === 0 ? "loading" : "idle";
-    // const loadingState = 'idle'
+    const {block: blockCurrent} = useIndexData()
+    const renderCell = React.useCallback((user: blockType, columnKey: keyof blockType) => {
+        const cellValue = user[columnKey];
+        const press=()=>{
+            const {BlockHeight,BlockHash,TxNum,Timestamp}=user
+            const encoded = btoa(JSON.stringify({BlockHeight,BlockHash,TxNum,Timestamp})); // Base64编码
+            router.push(`/block/${user.BlockHeight}?data=${encoded}`);
+        }
+        switch (columnKey) {
+            case "BlockHeight":
+            case "BlockHash":
+                return (
+                    <Link onPress={press} isBlock className={'cursor-pointer'}  >
+                        {cellValue}
+                    </Link>
+                );
+            case "Timestamp":
+                return (
+                    <>
+                        <div className={'flex items-center gap-2'}>
+                            {cellValue}
+                        </div>
+
+                    </>
+                )
+            default:
+                return cellValue;
+        }
+    }, []);
     return (
-        <div >
-            <Card  className={''}>
+        <div>
+            <Card className={''}>
                 <CardHeader>
-                    <h3 className=" ">当前区块{total}</h3>
+                    <h3 className="font-bold">当前区块:<Chip className={'text-lg'} color="success">{blockCurrent}</Chip>
+                    </h3>
                 </CardHeader>
                 <CardBody>
                     <Table
                         isStriped
+                        isHeaderSticky
                     >
                         <TableHeader>
                             <TableColumn key="BlockHeight">
                                 区块高度</TableColumn>
                             <TableColumn key="BlockHash">区块哈希</TableColumn>
                             <TableColumn key="TxNum">交易数量</TableColumn>
-                            <TableColumn key="Timestamp">出块时间</TableColumn>
+                            <TableColumn key="Timestamp" >
+                                出块时间
+                            </TableColumn>
                         </TableHeader>
                         <TableBody
                             items={data ?? []}
-                            loadingContent={<Spinner />}
+                            loadingContent={<Spinner/>}
                             loadingState={loadingState}
                             isLoading={isLoading}
                         >
                             {(item) => (
                                 <TableRow key={item?.Id}>
-                                    {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                                    {(columnKey) => <TableCell>{renderCell(item, columnKey as keyof blockType)}</TableCell>}
                                 </TableRow>
                             )}
                         </TableBody>
@@ -95,7 +122,7 @@ export default function Page() {
                         showShadow
                         color="primary"
                         page={page}
-                        total={total}
+                        total={totalPage}
                         onChange={(page) => setPage(page)}
                     />
                 </CardFooter>

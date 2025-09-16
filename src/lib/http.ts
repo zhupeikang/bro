@@ -184,11 +184,11 @@ class HttpService {
     public get<T>(url: string, config?: AxiosRequestConfig):  Promise<AxiosResponse<T>>{
         return this.instance.get<T>(url, config);
     }
-    public post<T>(url: string, data?: never, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    public post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         return this.instance.post<T>(url, data, config);
     }
 
-    public put<T>(url: string, data?: never, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    public put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         return this.instance.put<T>(url, data, config);
     }
 
