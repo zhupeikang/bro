@@ -1,11 +1,42 @@
 'use client';
 import {Button, Card, CardBody, CardFooter, CardHeader, Divider, Link} from "@heroui/react";
 import {ArrowRightLeft, Gem, HardDrive, Wallet} from 'lucide-react';
-import React from "react";
+import React, {useEffect} from "react";
 import {useIndexData} from "@/hooks/useIndexData";
+import {BlockTable} from "@/app/block/dataTable";
+import {blockDetail, blockList, blockType, transactionListType} from "@/api";
+import {toDate} from "@/lib/function";
+import {TransactionTable} from "@/app/transaction/dataTable";
 
 export default function Home() {
     const {trans_count,nft_count,block,user_count}=useIndexData()
+
+    const [dataTable, setData] = React.useState<blockType[]>([]);
+    const [dataTable2, setData2] = React.useState<transactionListType[]>([]);
+    useEffect(() => {
+        blockList({size: 5,page:0}).then((res) => {
+            // 取出第一条数据的ID值除以size当做总页数
+            setIsLoading(false);
+            res.data.data.list.forEach(item => {
+                item.Timestamp = toDate(Number(item.Timestamp))
+            })
+            setData(res.data.data.list);
+            // 处理返回的数据
+        })
+        blockDetail({size: 5, page: 0}).then((res) => {
+            // 取出第一条数据的ID值除以size当做总页数
+            setIsLoading2(false);
+
+            res.data.data.list.forEach(item => {
+                item.Timestamp =toDate(Number(item.Timestamp))
+            })
+            setData2(res.data.data.list);
+            // 处理返回的数据
+        })
+    }, []);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isLoading2, setIsLoading2] = React.useState(true);
+
     return (
             <div className="min-h-screen flex p-10 flex-col   bg-gray-100">
                 <Card className="">
@@ -58,23 +89,8 @@ export default function Home() {
                                 <Divider className="mb-5"/>
 
                                 <CardBody>
-                                    <ul className="space-y-2">
-                                        <li className="flex justify-between">
-                                            <span>交易哈希1</span>
-                                            <Link href="/transaction/1"
-                                                  className="text-blue-500 hover:underline">查看详情</Link>
-                                        </li>
-                                        <li className="flex justify-between">
-                                            <span>交易哈希2</span>
-                                            <Link href="/transaction/2"
-                                                  className="text-blue-500 hover:underline">查看详情</Link>
-                                        </li>
-                                        <li className="flex justify-between">
-                                            <span>交易哈希3</span>
-                                            <Link href="/transaction/3"
-                                                  className="text-blue-500 hover:underline">查看详情</Link>
-                                        </li>
-                                    </ul>
+                                    <BlockTable data={dataTable} isLoading={isLoading} ></BlockTable>
+
                                 </CardBody>
                                 <CardFooter className={'justify-end'}>
                                     <Button variant="flat" color="primary" className="">
@@ -88,23 +104,11 @@ export default function Home() {
                                 </CardHeader>
                                 <Divider className="mb-5"/>
                                 <CardBody>
-                                    <ul className="space-y-2">
-                                        <li className="flex justify-between">
-                                            <span>交易哈希1</span>
-                                            <Link href="/transaction/1"
-                                                  className="text-blue-500 hover:underline">查看详情</Link>
-                                        </li>
-                                        <li className="flex justify-between">
-                                            <span>交易哈希2</span>
-                                            <Link href="/transaction/2"
-                                                  className="text-blue-500 hover:underline">查看详情</Link>
-                                        </li>
-                                        <li className="flex justify-between">
-                                            <span>交易哈希3</span>
-                                            <Link href="/transaction/3"
-                                                  className="text-blue-500 hover:underline">查看详情</Link>
-                                        </li>
-                                    </ul>
+
+
+
+                                    <TransactionTable data={dataTable2} isLoading={isLoading2} ></TransactionTable>
+
                                 </CardBody>
                                 <CardFooter className={'justify-end'}>
                                     <Button variant={'flat'} color="secondary" className="">

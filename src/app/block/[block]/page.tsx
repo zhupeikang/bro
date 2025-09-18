@@ -2,21 +2,26 @@
 import React, {use, useEffect} from 'react'
 import {
     Card,
-    CardBody, CardFooter,
+    CardBody,
+    CardFooter,
     CardHeader,
-    Divider, getKeyValue, Link, Pagination,
+    Divider,
+    Link,
+    Pagination,
     Spinner,
     Table,
-    TableBody, TableCell,
+    TableBody,
+    TableCell,
     TableColumn,
     TableHeader,
     TableRow
 } from "@heroui/react";
-import {useIndexData} from "@/hooks/useIndexData";
-import {useRouter, useSearchParams} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {Chip} from "@heroui/chip";
-import {blockDetail, blockList, blockType} from "@/api";
+import {blockDetail, transactionListType} from "@/api";
 import {toDate} from "@/lib/function";
+import {CopyableText} from "@/componments/CopyableText";
+import {TransactionTable} from "@/app/transaction/dataTable";
 
 export default function Page({params,searchParams}: {
     params: Promise<{ block: string }>,
@@ -31,7 +36,7 @@ export default function Page({params,searchParams}: {
 
     const {block} = use(params)
 
-    const [data, setData] = React.useState<blockType[]>();
+    const [data, setData] = React.useState<transactionListType[]>([]);
     const [page, setPage] = React.useState(1);
     const [total, setTotal] = React.useState(0);
 
@@ -45,24 +50,23 @@ export default function Page({params,searchParams}: {
         blockDetail({size: rowsPerPage, block_height: block as unknown as number,page:page-1}).then((res) => {
             // 取出第一条数据的ID值除以size当做总页数
             res.data.data.list.forEach(item => {
-                item.Timestamp = toDate(Number(item.Timestamp))
+                item.Timestamp =toDate(Number(item.Timestamp))
             })
             setIsLoading(false)
             setData(res.data.data.list);
             setTotal(res.data.data.total);
 
             // 处理返回的数据
-        }).catch((error) => {
-        });
+        })
     }, [block, page]);
     const router = useRouter()
 
-    const renderCell = React.useCallback((user: blockType, columnKey: keyof blockType) => {
+    const renderCell = React.useCallback((user: transactionListType, columnKey: keyof transactionListType) => {
         const cellValue = user[columnKey];
         const press=()=>{
-            const {BlockHeight,BlockHash,TxNum,Timestamp}=user
-            const encoded = btoa(JSON.stringify({BlockHeight,BlockHash,TxNum,Timestamp})); // Base64编码
-            router.push(`/block/${user.BlockHeight}?data=${encoded}`);
+            const {TxId}=user
+            const encoded = btoa(JSON.stringify({TxId})); // Base64编码
+            router.push(`/transaction/${user.Id}?data=${encoded}`);
         }
         const statusColor=user['TxStatusCode']==='SUCCESS'?'success':'danger'
         switch (columnKey) {
@@ -121,7 +125,10 @@ export default function Page({params,searchParams}: {
                         <div className="flex flex-col gap-3">
                             <div className="flex ">
                                 <div className={'font-bold'}>区块哈希</div>
-                                <div className={'ml-4'}>{obj.BlockHash}</div>
+                                <div className={'ml-4 flex items-center gap-3'}>
+                                    {obj.BlockHash}
+                                    <CopyableText text={obj.BlockHash}></CopyableText>
+                                </div>
                             </div>
                             <div className="flex ">
                                 <div className={'font-bold'}>交易数量</div>
@@ -142,31 +149,7 @@ export default function Page({params,searchParams}: {
                     </CardHeader>
                     <Divider/>
                     <CardBody>
-                        <Table
-                            isStriped
-                        >
-                            <TableHeader>
-                                <TableColumn key="TxId">
-                                    交易哈希</TableColumn>
-                                <TableColumn key="TxType">交易消息类型</TableColumn>
-                                <TableColumn key="TxStatusCode">状态</TableColumn>
-                                <TableColumn key="BlockHeight">区块高度</TableColumn>
-                                <TableColumn key="Timestamp">时间</TableColumn>
-                                <TableColumn key="Gas">GAS</TableColumn>
-                            </TableHeader>
-                            <TableBody
-                                items={data ?? []}
-                                loadingContent={<Spinner/>}
-                                loadingState={loadingState}
-                                isLoading={isLoading}
-                            >
-                                {(item) => (
-                                    <TableRow key={item?.Id}>
-                                        {(columnKey) => <TableCell>{renderCell(item, columnKey as keyof blockType)}</TableCell>}
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                        <TransactionTable data={data} isLoading={isLoading}></TransactionTable>
                     </CardBody>
                     <CardFooter className={'flex justify-end'}>
                         <Pagination
