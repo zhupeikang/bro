@@ -1,6 +1,6 @@
 import httpService from "@/lib/http";
 import {indexDataType} from "@/hooks/useIndexData";
-import {AccountDetailType, ContractDetailType, TxDetailType} from "@/type";
+import {AccountDetailType, AssetData, NFTLIST, TxDetailType} from "@/type";
 
 const API = {
     BLOCK: {
@@ -17,8 +17,9 @@ const API = {
     ACCOUNT:{
         DETAIL:'explorer/v1/account'
     },
-    CONTRACT:{
-        DETAIL:'explorer/v1/contract'
+    NFT:{
+        DETAIL:'explorer/v1/asset',
+        LIST:'explorer/v1/nft_list'
     }
 }
 
@@ -81,6 +82,12 @@ export type SyResponse<T> = {
     }
 }
 
+export type AssResponse<T> = {
+    code: number;
+    type: string;
+    msg: string;
+    data: T;
+}
 
 
 
@@ -111,8 +118,14 @@ export const accountDetail = async (params: {
 }) => {
     return httpService.get<{ data: AccountDetailType }>(API.ACCOUNT.DETAIL, {params})
 }
-export const contractDetail = async (params: {
+export const nftDetail = async (params: {
     hash: string,
 }) => {
-    return httpService.get<{ data: ContractDetailType }>(API.ACCOUNT.DETAIL, {params})
+    return httpService.get<AssResponse<AssetData>>(API.NFT.DETAIL, {params})
+}
+export const nftList= async (params: {
+    size: number,
+    page:number
+}) => {
+    return httpService.get<AssResponse<NFTLIST>>(API.NFT.LIST, {params})
 }

@@ -6,6 +6,8 @@ import {useIndexData} from "@/hooks/useIndexData";
 import {Chip} from "@heroui/chip";
 import {toDate} from "@/lib/function";
 import {TransactionTable} from "@/app/transaction/dataTable";
+import {useRouter} from "next/navigation";
+import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export default function Page() {
 
@@ -61,4 +63,10 @@ export default function Page() {
             </Card>
         </div>
     );
+}
+
+
+
+export function goTransactionDetail(txHash: string,router:AppRouterInstance) {
+    router.push(`/transaction/${txHash}`);
 }

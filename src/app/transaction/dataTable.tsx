@@ -17,7 +17,7 @@ export const TransactionTable=({data,isLoading}:{data:transactionListType[],isLo
         const press=()=>{
             const {TxId}=user
             const encoded = btoa(JSON.stringify({TxId})); // Base64编码
-            router.push(`/transaction/${user.Id}?data=${encoded}`);
+            router.push(`/transaction/${user.TxId}`);
         }
         const pressHeight=()=>{
             const {BlockHeight,BlockHash,Timestamp}=user

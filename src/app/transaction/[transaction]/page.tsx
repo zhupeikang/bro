@@ -4,23 +4,20 @@ import {Card, CardBody, CardFooter, CardHeader, Divider} from "@heroui/react";
 import {transactionDetailHash} from "@/api";
 import {CopyableText} from "@/componments/CopyableText";
 
-export default function Page({params,searchParams}: {
+export default function Page({params}: {
     params: Promise<{ transaction: string }>,
-    searchParams: Promise<{data:string }>
 }) {
 
-    const {data:search}=use(searchParams)
-    const obj:{ TxId:string} = JSON.parse(atob(search));
     const [info,setInfo]=useState({})
     const {transaction} = use(params)
     // 发送请求
     useEffect(() => {
         // transactionDetailHash({hash:obj.TxId}).then((res) => {
-        transactionDetailHash({hash:obj.TxId}).then((res) => {
+        transactionDetailHash({hash:transaction}).then((res) => {
             setInfo(res.data.data.result)
             // 处理返回的数据
         })
-    }, [obj.TxId, transaction]);
+    }, [ transaction]);
 
 
 
@@ -40,22 +37,22 @@ export default function Page({params,searchParams}: {
                             <div className="flex ">
                                 <div className={'font-bold'}>交易哈希</div>
                                 <div className={'ml-4 flex items-center gap-3'}>
-                                    {obj.TxId}
-                                    <CopyableText text={obj.TxId}></CopyableText>
+                                    {transaction}
+                                    <CopyableText text={transaction}></CopyableText>
                                 </div>
                             </div>
-                            <div className="flex ">
-                                <div className={'font-bold'}>交易状态</div>
-                                <div className={'ml-4'}>{obj.TxNum}</div>
-                            </div>
-                            <div className="flex ">
-                                <div className={'font-bold'}>区块高度</div>
-                                <div className={'ml-4'}>{obj.Timestamp}</div>
-                            </div>
-                            <div className="flex ">
-                                <div className={'font-bold'}>时间</div>
-                                <div className={'ml-4'}>{obj.Timestamp}</div>
-                            </div>
+                            {/*<div className="flex ">*/}
+                            {/*    <div className={'font-bold'}>交易状态</div>*/}
+                            {/*    <div className={'ml-4'}>{obj.TxNum}</div>*/}
+                            {/*</div>*/}
+                            {/*<div className="flex ">*/}
+                            {/*    <div className={'font-bold'}>区块高度</div>*/}
+                            {/*    <div className={'ml-4'}>{obj.Timestamp}</div>*/}
+                            {/*</div>*/}
+                            {/*<div className="flex ">*/}
+                            {/*    <div className={'font-bold'}>时间</div>*/}
+                            {/*    <div className={'ml-4'}>{obj.Timestamp}</div>*/}
+                            {/*</div>*/}
                         </div>
                     </CardBody>
                 </Card>

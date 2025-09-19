@@ -38,7 +38,7 @@ export default function Home() {
     const [isLoading2, setIsLoading2] = React.useState(true);
 
     return (
-            <div className="min-h-screen flex p-10 flex-col   bg-gray-100">
+            <div className="min-h-screen flex p-4 md:p-10 flex-col   bg-gray-100">
                 <Card className="">
                     <CardHeader className="flex gap-3">
                         <div className="flex flex-col">
@@ -46,7 +46,7 @@ export default function Home() {
                         </div>
                     </CardHeader>
                     <CardBody>
-                        <div className="flex gap-3 mb-5">
+                        <div className="flex flex-col  md:flex-row  gap-3 mb-5">
                             <div className="flex-1 flex  justify-between bg-white p-2 rounded-lg shadow">
                                 <div>
                                     <p className="text-gray-500">交易总数</p>

@@ -11,10 +11,11 @@ export const toDate = (timestamp: number) => {
 }
 
 export const shortenHash = (
-    hash: string,
+    hash: string|number,
     front = 10,
     back = 4
 ):string  => {
+    hash = String(hash);
     if (!hash || hash.length <= front + back) {
         return hash; // 长度太短就不省略
     }

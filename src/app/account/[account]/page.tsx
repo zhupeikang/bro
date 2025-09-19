@@ -5,20 +5,20 @@ import {AccountDetailType} from "@/type";
 import {CopyableText} from "@/componments/CopyableText";
 import {Tab, Tabs} from "@heroui/tabs";
 import {Card, CardBody} from "@heroui/react";
-import {NftTable} from "@/app/account/[address]/dataTable";
+import {NftTable} from "@/app/account/dataTable";
 
-export default function Page({params}: { params: Promise<{ address: string }> }) {
-    const {address} = use(params)
+export default function Page({params}: { params: Promise<{ account: string }> }) {
+    const {account} = use(params)
     const [info,seiInfo]=useState<AccountDetailType>({account: {address:'',created_at:0}, count: 0, list: []})
     const [page, setPage] = React.useState(1);
     const rowsPerPage = 15;
     const [total, setTotal] = React.useState(0);
     useEffect(() => {
-        accountDetail({hash: address,page,size:rowsPerPage }).then(res=>{
+        accountDetail({hash: account,page,size:rowsPerPage }).then(res=>{
             seiInfo(res.data.data)
             setTotal(res.data.data.count)
         })
-    }, [address, page]);
+    }, [account, page]);
 
     const totalPage = React.useMemo(() => {
         return Math.ceil(total / rowsPerPage);

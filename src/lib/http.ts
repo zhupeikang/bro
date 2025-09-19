@@ -107,10 +107,16 @@ class HttpService {
 
         // 响应拦截器 - 处理 token 过期
         this.instance.interceptors.response.use(
-            (response: AxiosResponse) => response,
+            (response: AxiosResponse) => {
+                console.log(response)
+                if (response.data.code === 200) {
+                    return response;
+                } else {
+                    return Promise.reject(new Error(response.statusText || 'Error'));
+                }
+            },
             async (error: AxiosError) => {
                 const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
                 // 处理 401 错误且不是刷新 token 的请求
                 if (error.response?.status === 401 && !originalRequest?._retry) {
                     if (this.isRefreshing) {

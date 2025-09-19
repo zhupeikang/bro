@@ -1,7 +1,18 @@
 'use client'
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button,Input} from '@heroui/react';
+import {
+    Navbar,
+    NavbarBrand,
+    NavbarContent,
+    NavbarItem,
+    Link,
+    Button,
+    Input,
+    NavbarMenuToggle,
+    NavbarMenu, NavbarMenuItem
+} from '@heroui/react';
 import {usePathname} from "next/navigation";
 import {SearchIcon} from "@heroui/shared-icons";
+import React from "react";
 
 export const AcmeLogo = () => {
     return (
@@ -23,7 +34,7 @@ export default function Header() {
         name: string;
         href: string;
     }
-
+    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const nav: NavItem[] = [
         {name: '首页', href: '/'},
         {name: '区块浏览', href: '/block'},
@@ -31,15 +42,35 @@ export default function Header() {
         {name: 'NFT', href: '/nft'},
     ]
     const pathname = usePathname();
-    return (
-        <Navbar maxWidth={'2xl'} isBordered shouldHideOnScroll>
-            <NavbarBrand>
-                <AcmeLogo/>
-                <p className="font-bold text-inherit">恺英联盟链</p>
-            </NavbarBrand>
-            <NavbarContent className="hidden sm:flex gap-4" justify="end">
-                {nav.map((item:NavItem) => {
 
+
+    const menuItems = [
+        "Profile",
+        "Dashboard",
+        "Activity",
+        "Analytics",
+        "System",
+        "Deployments",
+        "My Settings",
+        "Team Settings",
+        "Help & Feedback",
+        "Log Out",
+    ];
+
+    return (
+        <Navbar isBordered shouldHideOnScroll onMenuOpenChange={setIsMenuOpen}>
+            <NavbarContent>
+                <NavbarMenuToggle
+                    aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                    className="sm:hidden"
+                />
+                <NavbarBrand>
+                    <p className="font-bold text-inherit">恺英联盟链</p>
+                </NavbarBrand>
+            </NavbarContent>
+
+            <NavbarContent className="hidden sm:flex gap-4" justify="center">
+                {nav.map((item:NavItem) => {
                     const isActive = pathname === item.href;
                     return (
                         <NavbarItem key={item.name} data-active={item.href === pathname} className="text-sm">
@@ -51,21 +82,26 @@ export default function Header() {
                     );
                 })}
 
-                <Input
-                    classNames={{
-                        base: "max-w-full sm:max-w-[40rem] ",
-                        mainWrapper: "h-full",
-                        input: "text-small",
-                        inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
-                    }}
-                    placeholder="请输入地址/交易哈希/区块高度进行搜索"
-                    size="sm"
-                    startContent={<SearchIcon  />}
-                    type="search"
-                />
             </NavbarContent>
 
+            <NavbarMenu>
+
+                {nav.map((item:NavItem) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <NavbarItem key={item.name} data-active={item.href === pathname} className="text-sm">
+                            <Link aria-current={isActive ? 'page' : undefined}
+                                  color={isActive? 'primary' : 'foreground'} href={item.href}>
+                                {item.name}
+                            </Link>
+                        </NavbarItem>
+                    );
+                })}
+
+
+            </NavbarMenu>
         </Navbar>
+
     );
 }
 

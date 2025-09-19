@@ -33,7 +33,7 @@ export const NftTable=({data,isLoading,page,setPageAction,total}:NftTableProps)=
         const press=()=>{
             // const {BlockHeight,BlockHash,TxNum,Timestamp}=user
             // const encoded = btoa(JSON.stringify({BlockHeight,BlockHash,TxNum,Timestamp})); // Base64编码
-            // router.push(`/block/${user.BlockHeight}?data=${encoded}`);
+            router.push(`/nft/${user.tokenId}`);
         }
         switch (columnKey) {
             case "contractId":
@@ -101,6 +101,7 @@ export const NftTable=({data,isLoading,page,setPageAction,total}:NftTableProps)=
                     NFT名称</TableColumn>
                 <TableColumn key="tokenId">NFT ID</TableColumn>
                 <TableColumn key="contractId">合约ID</TableColumn>
+                <TableColumn key="txId">交易Hash</TableColumn>
                 <TableColumn key="createAt" >
                     创建时间
                 </TableColumn>
